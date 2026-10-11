@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio3D Nexus | Realistic 3D Human Anatomy & Segmented Atlas</title>
+    <meta name="description" content="State-of-the-art interactive 3D human anatomy atlas showing realistic organ specimens, coronal dissections, valves, and a full human body multi-system matrix.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for medical & UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Three.js & Controls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body class="theme-dark">
+    <!-- Background Ambient Canvas / Gradients -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="cyber-grid-overlay"></div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="main-navbar" id="mainNavbar">
+        <div class="nav-brand-container">
+            <div class="brand-logo-icon">
+                <i class="fa-solid fa-heart-pulse ekg-icon"></i>
+                <div class="pulse-ring"></div>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">BIO<span class="text-accent">3D</span> NEXUS</span>
+                <span class="brand-sub">Realistic 3D Human Anatomy Atlas</span>
+            </div>
+        </div>
+
+        <!-- Central Body Parts Dropdown Selector & Quick Tabs -->
+        <div class="nav-organ-selector-container">
+            <!-- Mega Dropdown: All Body Parts In 3D -->
+            <div class="organ-dropdown-wrapper" id="organDropdownWrapper">
+                <button class="organ-dropdown-btn" id="organDropdownBtn" title="Select any 3D body part from complete anatomical registry">
+                    <span class="selected-organ-icon" id="navSelectedOrganIcon">🧍</span>
+                    <span class="selected-organ-name" id="navSelectedOrganName">Full Human Body</span>
+                    <i class="fa-solid fa-chevron-down dd-arrow"></i>
+                </button>
+                <div class="organ-dropdown-menu" id="organDropdownMenu">
+                    <div class="dropdown-search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="organDropdownFilter" placeholder="Filter body parts...">
+                    </div>
+                    
+                    <div class="organ-menu-scroll">
+                        <!-- Group 1: Integrated -->
+                        <div class="organ-group-title">Integrative Matrix</div>
+                        <button class="organ-menu-item active" data-organ="full_body">
+                            <span class="menu-icon">🧍</span>
+                            <div class="menu-text">
+                                <span class="item-title">Full Human Body</span>
+                                <span class="item-desc">All Organs in Translucent Silhouette</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 2: Cardiovascular -->
+                        <div class="organ-group-title">Cardiovascular System</div>
+                        <button class="organ-menu-item" data-organ="heart">
+                            <span class="menu-icon">🫀</span>
+                            <div class="menu-text">
+                                <span class="item-title">Human Heart (Specimen)</span>
+                                <span class="item-desc">Adipose Fat Pads, Coronary Tree & Valves</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 3: Respiratory -->
+                        <div class="organ-group-title">Respiratory System</div>
+                        <button class="organ-menu-item" data-organ="lungs">
+                            <span class="menu-icon">🫁</span>
+                            <div class="menu-text">
+                                <span class="item-title">Respiratory Lungs</span>
+                                <span class="item-desc">Trachea, Bilateral Lobes & Diaphragm</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 4: Nervous & Sensory -->
+                        <div class="organ-group-title">Nervous & Sensory Apparatus</div>
+                        <button class="organ-menu-item" data-organ="brain">
+                            <span class="menu-icon">🧠</span>
+                            <div class="menu-text">
+                                <span class="item-title">Human Brain & Encephalon</span>
+                                <span class="item-desc">Cerebral Gyri, Cerebellum & Brainstem</span>
+                            </div>
+                        </button>
+                        <button class="organ-menu-item" data-organ="eye">
+                            <span class="menu-icon">👁️</span>
+                            <div class="menu-text">
+                                <span class="item-title">Human Eye (Ocular Globe)</span>
+                                <span class="item-desc">Cornea, Lens, Retina & Optic Nerve</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 5: Digestive & Metabolic -->
+                        <div class="organ-group-title">Digestive & Metabolic Viscera</div>
+                        <button class="organ-menu-item" data-organ="liver">
+                            <span class="menu-icon">🫓</span>
+                            <div class="menu-text">
+                                <span class="item-title">Liver & Gallbladder</span>
+                                <span class="item-desc">Hepatic Lobes, Biliary Tree & Portal Triad</span>
+                            </div>
+                        </button>
+                        <button class="organ-menu-item" data-organ="stomach">
+                            <span class="menu-icon">🥐</span>
+                            <div class="menu-text">
+                                <span class="item-title">Stomach & Gastric Rugae</span>
+                                <span class="item-desc">Fundus, Body, Curvatures & Pylorus</span>
+                            </div>
+                        </button>
+                        <button class="organ-menu-item" data-organ="intestines">
+                            <span class="menu-icon">🌀</span>
+                            <div class="menu-text">
+                                <span class="item-title">Intestines (Enteric Tract)</span>
+                                <span class="item-desc">Small Intestine Coils, Colon & Appendix</span>
+                            </div>
+                        </button>
+                        <button class="organ-menu-item" data-organ="pancreas_spleen">
+                            <span class="menu-icon">🥖</span>
+                            <div class="menu-text">
+                                <span class="item-title">Pancreas & Spleen</span>
+                                <span class="item-desc">Islets of Langerhans & Lymphoid Spleen</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 6: Renal & Pelvic -->
+                        <div class="organ-group-title">Renal & Pelvic Systems</div>
+                        <button class="organ-menu-item" data-organ="kidney">
+                            <span class="menu-icon">🫘</span>
+                            <div class="menu-text">
+                                <span class="item-title">Kidneys & Adrenals</span>
+                                <span class="item-desc">Renal Pyramids, Pelvis & Suprarenal Cap</span>
+                            </div>
+                        </button>
+                        <button class="organ-menu-item" data-organ="bladder">
+                            <span class="menu-icon">🎈</span>
+                            <div class="menu-text">
+                                <span class="item-title">Urinary Bladder</span>
+                                <span class="item-desc">Detrusor Muscle Dome & Pelvic Trigone</span>
+                            </div>
+                        </button>
+
+                        <!-- Group 7: Skeletal -->
+                        <div class="organ-group-title">Skeletal Framework</div>
+                        <button class="organ-menu-item" data-organ="skeleton">
+                            <span class="menu-icon">🦴</span>
+                            <div class="menu-text">
+                                <span class="item-title">Spine & Skeletal Ribcage</span>
+                                <span class="item-desc">Vertebrae, Costal Ribs & Pelvic Girdle</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Pill Chips for High Frequency Navigation -->
+            <nav class="nav-quick-chips" id="navQuickChips" aria-label="Quick Organ Access">
+                <button class="organ-chip active" data-organ="full_body" id="btn-full_body" title="Integrated Human Matrix">
+                    <span class="chip-icon">🧍</span>
+                    <span class="chip-label">Full Body</span>
+                    <span class="live-dot pulse-dot"></span>
+                </button>
+                <button class="organ-chip" data-organ="heart" id="btn-heart" title="Human Heart Model">
+                    <span class="chip-icon">🫀</span>
+                    <span class="chip-label">Heart</span>
+                </button>
+                <button class="organ-chip" data-organ="brain" id="btn-brain" title="Human Brain">
+                    <span class="chip-icon">🧠</span>
+                    <span class="chip-label">Brain</span>
+                </button>
+                <button class="organ-chip" data-organ="lungs" id="btn-lungs" title="Respiratory System">
+                    <span class="chip-icon">🫁</span>
+                    <span class="chip-label">Lungs</span>
+                </button>
+                <button class="organ-chip" data-organ="liver" id="btn-liver" title="Liver & Gallbladder">
+                    <span class="chip-icon">🫓</span>
+                    <span class="chip-label">Liver</span>
+                </button>
+                <button class="organ-chip" data-organ="kidney" id="btn-kidney" title="Renal System">
+                    <span class="chip-icon">🫘</span>
+                    <span class="chip-label">Kidneys</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Right Action Controls in Nav -->
+        <div class="nav-actions">
+            <!-- Search Anatomy Trigger -->
+            <button class="nav-btn" id="searchTriggerBtn" title="Search Anatomical Structures (Ctrl+K)">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span class="btn-text-hide">Search</span>
+                <span class="kbd-badge">⌘K</span>
+            </button>
+
+            <!-- Render Style Modes Dropdown -->
+            <div class="nav-dropdown-wrapper">
+                <button class="nav-btn active-mode-btn" id="renderModeMenuBtn" title="3D Shading Mode">
+                    <i class="fa-solid fa-palette text-accent"></i>
+                    <span id="currentModeLabel">Realistic</span>
+                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                </button>
+                <div class="dropdown-menu" id="renderModeMenu">
+                    <div class="dropdown-header">Rendering Shader</div>
+                    <button class="dropdown-item active" data-mode="realistic">
+                        <i class="fa-solid fa-dna"></i> Realistic Specimen
+                    </button>
+                    <button class="dropdown-item" data-mode="xray">
+                        <i class="fa-solid fa-radiation"></i> Medical X-Ray
+                    </button>
+                    <button class="dropdown-item" data-mode="hologram">
+                        <i class="fa-solid fa-microchip"></i> Cyber Hologram
+                    </button>
+                    <button class="dropdown-item" data-mode="wireframe">
+                        <i class="fa-solid fa-border-all"></i> Wireframe Grid
+                    </button>
+                    <button class="dropdown-item" data-mode="glass">
+                        <i class="fa-solid fa-gem"></i> Translucent Glass
+                    </button>
+                </div>
+            </div>
+
+            <!-- Explode Dissection Trigger -->
+            <button class="nav-btn explode-toggle-btn" id="explodeToggleBtn" title="Explode Segments Apart">
+                <i class="fa-solid fa-cubes-stacked"></i>
+                <span>Explode</span>
+                <span class="explode-indicator" id="explodeStatus">OFF</span>
+            </button>
+
+            <!-- Internal Coronal Cut / Valve Dissection (like heart_2.jpg) -->
+            <button class="nav-btn" id="coronalCutBtn" title="Toggle Internal Coronal Chamber & Valve Cutaway (Demo Image 2)">
+                <i class="fa-solid fa-scissors text-accent"></i>
+                <span class="btn-text-hide">Chamber Cut</span>
+            </button>
+
+            <!-- Physiological Simulation Motion (Pulse / Respiration) -->
+            <button class="nav-btn active" id="vitalMotionBtn" title="Simulate Physiological Organ Motion">
+                <i class="fa-solid fa-wave-square pulse-icon"></i>
+                <span class="btn-text-hide">Vital Pulse</span>
+            </button>
+
+            <!-- Audio Beats Synth -->
+            <button class="nav-btn" id="audioSynthBtn" title="Physiological Cardiac & Lung Audio Beats">
+                <i class="fa-solid fa-volume-xmark" id="audioIcon"></i>
+            </button>
+
+            <!-- Anatomical Knowledge & Quiz -->
+            <button class="nav-btn" id="quizModalBtn" title="Interactive Anatomy Quiz">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span class="btn-text-hide">Quiz</span>
+            </button>
+
+            <!-- Clinical Facts Drawer Toggle -->
+            <button class="nav-btn" id="clinicalDrawerBtn" title="Clinical Insights & Medical Data">
+                <i class="fa-solid fa-book-medical"></i>
+            </button>
+
+            <!-- Fullscreen -->
+            <button class="nav-btn" id="fullscreenBtn" title="Toggle Fullscreen View">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN 3D APPLICATION WORKSPACE -->
+    <main class="app-workspace">
+        
+        <!-- 3D WebGL Canvas Container -->
+        <div class="viewport-3d" id="viewport3D">
+            <div id="canvasContainer"></div>
+            
+            <!-- Loading Indicator -->
+            <div class="viewport-loader" id="viewportLoader">
+                <div class="spinner-medical">
+                    <div class="spinner-ring"></div>
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div class="loading-label">Loading Segmented 3D Matrix...</div>
+            </div>
+
+            <!-- Floating 3D Overlays & Controls on Canvas -->
+            <!-- Top-Left Floating Organ Header -->
+            <div class="floating-organ-badge" id="floatingOrganBadge">
+                <div class="badge-icon" id="hudOrganIcon">🧍</div>
+                <div class="badge-content">
+                    <div class="badge-title" id="hudOrganName">Full Human Body</div>
+                    <div class="badge-meta">
+                        <span class="badge-system" id="hudOrganSystem">Integrated Multi-System Anatomy</span>
+                        <span class="badge-latin" id="hudOrganLatin">Corpus Humanum Integratum</span>
+                    </div>
+                </div>
+                <!-- Quick Zoom-Out Button when inspecting isolated organ -->
+                <button class="zoom-out-body-btn" id="zoomOutBodyBtn" style="display: none;" title="Zoom Out to Full Body Overview">
+                    <i class="fa-solid fa-arrow-left"></i> Full Body
+                </button>
+            </div>
+
+            <!-- Top-Right Explode Slider Control Overlay -->
+            <div class="floating-slider-panel" id="floatingSliderPanel">
+                <div class="slider-header">
+                    <span class="slider-title"><i class="fa-solid fa-arrows-split-up-and-left"></i> Segment Separation</span>
+                    <span class="slider-value" id="explodeValueDisplay">0%</span>
+                </div>
+                <div class="slider-control-row">
+                    <input type="range" min="0" max="100" value="0" class="custom-range" id="explodeSlider" aria-label="Explode distance">
+                    <button class="reset-slider-btn" id="resetExplodeBtn" title="Assemble Back to Center">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Action Floating Bar (Bottom Center) -->
+            <div class="floating-action-dock" id="floatingActionDock">
+                <button class="dock-btn" id="dockResetCam" title="Reset Camera Angle">
+                    <i class="fa-solid fa-crosshairs"></i>
+                    <span>Reset View</span>
+                </button>
+                <button class="dock-btn" id="dockAutoRotate" title="Toggle 360° Inspection Orbit">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span id="rotateStateLabel">Auto Orbit</span>
+                </button>
+                <button class="dock-btn" id="dockPinsToggle" title="Toggle 3D Annotation Pins">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="pinsStateLabel">Labels ON</span>
+                </button>
+                <button class="dock-btn" id="dockCutawayView" title="Toggle Chamber & Valve Internal Dissection Cutaway">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span id="cutawayLabel">Dissection Cut</span>
+                </button>
+                <button class="dock-btn" id="dockSnapshot" title="Capture High-Res Image">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Snapshot</span>
+                </button>
+            </div>
+
+            <!-- 3D Hotspot Hover / Click Tooltip (Positioned in 3D) -->
+            <div class="hotspot-popup" id="hotspotPopup">
+                <div class="popup-header">
+                    <span class="popup-title" id="popupSegmentName">Segment Name</span>
+                    <button class="popup-close" id="popupCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="popup-body">
+                    <p class="popup-desc" id="popupSegmentDesc">Description text</p>
+                    <div class="popup-metrics" id="popupSegmentMetrics">
+                        <!-- Dynamic metadata -->
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button class="popup-action-btn" id="popupIsolateBtn">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> Zoom & Inspect in Detail
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vital Telemetry Monitor (Bottom-Left) -->
+            <div class="telemetry-hud" id="telemetryHud">
+                <div class="telemetry-header">
+                    <span class="telemetry-title"><i class="fa-solid fa-chart-line text-accent"></i> BIOMETRIC TELEMETRY</span>
+                    <span class="status-live">ONLINE</span>
+                </div>
+                <div class="telemetry-grid">
+                    <div class="telemetry-item">
+                        <span class="tel-label">Physiological Rate</span>
+                        <span class="tel-val" id="hudRateVal">Active</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="tel-label">Height / Mass</span>
+                        <span class="tel-val" id="hudWeightVal">175 cm</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="tel-label">Vascular Network</span>
+                        <span class="tel-val" id="hudFlowVal">60,000 miles</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="tel-label">Active Components</span>
+                        <span class="tel-val" id="hudSegmentCount">8 Structures</span>
+                    </div>
+                </div>
+                <!-- Mini EKG Canvas -->
+                <canvas id="ekgCanvas" width="220" height="42"></canvas>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: SEGMENTS EXPLORER & CLINICAL INSPECTOR -->
+        <aside class="sidebar-inspector" id="sidebarInspector">
+            <!-- Sidebar Header Tabs -->
+            <div class="sidebar-tabs">
+                <button class="sb-tab active" data-tab="segments" id="tabSegments">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Segments (<span id="segmentsBadgeCount">8</span>)</span>
+                </button>
+                <button class="sb-tab" data-tab="clinical" id="tabClinical">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span>Clinical</span>
+                </button>
+                <button class="sb-tab" data-tab="spec" id="tabSpec">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Anatomy</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Segments List & Visibility Toggles -->
+            <div class="sb-tab-content active" id="contentSegments">
+                <div class="segments-controls-bar">
+                    <span class="sec-title">Anatomical Components</span>
+                    <div class="toggle-all-btns">
+                        <button class="mini-text-btn" id="showAllSegmentsBtn">Show All</button>
+                        <span class="sep">•</span>
+                        <button class="mini-text-btn" id="isolateNoneBtn">Reset</button>
+                    </div>
+                </div>
+
+                <div class="segments-scroll-list" id="segmentsList">
+                    <!-- Dynamic segments injected here -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Clinical Pathology & Facts -->
+            <div class="sb-tab-content" id="contentClinical">
+                <div class="clinical-box">
+                    <h3 class="box-title"><i class="fa-solid fa-notes-medical text-accent"></i> Clinical Pathologies</h3>
+                    <div class="pathology-list" id="pathologyList">
+                        <!-- Dynamic clinical notes -->
+                    </div>
+                </div>
+
+                <div class="clinical-box mt-3">
+                    <h3 class="box-title"><i class="fa-solid fa-lightbulb text-accent"></i> Anatomical Insights</h3>
+                    <ul class="facts-list" id="clinicalFactsList">
+                        <!-- Dynamic facts -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab 3: Deep Anatomy Spec & Blood Supply -->
+            <div class="sb-tab-content" id="contentSpec">
+                <div class="spec-card">
+                    <h3 class="spec-title" id="specCardTitle">Cardiovascular Organ</h3>
+                    <p class="spec-desc" id="specCardDesc">Organ description goes here.</p>
+                    
+                    <div class="spec-table" id="specDataTable">
+                        <!-- Key specifications -->
+                    </div>
+                </div>
+
+                <div class="guide-box">
+                    <h4 class="guide-title"><i class="fa-solid fa-mouse"></i> 3D Navigation Guide</h4>
+                    <ul class="guide-steps">
+                        <li><span>Full Body View:</span> Click any organ in the body to zoom in!</li>
+                        <li><span>Left Mouse Drag:</span> 360° Free Orbit Rotation</li>
+                        <li><span>Right Mouse Drag:</span> Pan anatomical viewport</li>
+                        <li><span>Mouse Wheel:</span> Smooth Zoom In / Out</li>
+                        <li><span>Chamber Cut:</span> View inside heart valves & chambers (like demo photo!)</li>
+                        <li><span>Explode Slider:</span> Dissect and isolate parts</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Inspector Footer: Active Part Details Banner -->
+            <div class="inspector-footer" id="inspectorFooter">
+                <div class="active-part-card" id="activePartCard">
+                    <div class="part-header">
+                        <span class="part-indicator-dot" id="partDot"></span>
+                        <span class="part-name-display" id="partNameDisplay">Hover or Click Any Body Part</span>
+                    </div>
+                    <p class="part-summary" id="partSummaryDisplay">Click any organ in the full body or from the dropdown menu above to zoom in and inspect its high-resolution anatomical structure.</p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- SEARCH ANATOMICAL STRUCTURES MODAL (Ctrl+K) -->
+    <div class="modal-backdrop" id="searchModalBackdrop">
+        <div class="search-modal">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-modal-icon"></i>
+                <input type="text" id="anatomySearchInput" placeholder="Search organs, ventricles, lobes, cornea, liver, stomach, aorta..." autocomplete="off">
+                <button class="search-clear-btn" id="searchClearBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="search-results-list" id="searchResultsList">
+                <div class="search-hint">Type to instantly locate any of 60+ segmented anatomical structures...</div>
+            </div>
+            <div class="search-footer">
+                <span>Navigate: <kbd>↑</kbd> <kbd>↓</kbd></span>
+                <span>Select: <kbd>Enter</kbd></span>
+                <span>Close: <kbd>Esc</kbd></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE ANATOMICAL QUIZ MODAL -->
+    <div class="modal-backdrop" id="quizModalBackdrop">
+        <div class="quiz-modal">
+            <div class="quiz-header">
+                <div class="quiz-badge"><i class="fa-solid fa-brain"></i> ANATOMY CHALLENGE</div>
+                <button class="modal-close-btn" id="quizCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="quiz-body" id="quizBody">
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="quizProgressFill" style="width: 20%;"></div>
+                </div>
+                <div class="quiz-question-counter" id="quizCounter">Question 1 of 6</div>
+                <h3 class="quiz-question-text" id="quizQuestionText">Loading question...</h3>
+                <div class="quiz-options-container" id="quizOptionsContainer">
+                    <!-- Dynamic question choices -->
+                </div>
+                <div class="quiz-feedback-box" id="quizFeedbackBox" style="display: none;">
+                    <div class="feedback-title" id="feedbackTitle">Correct!</div>
+                    <p class="feedback-text" id="feedbackText">Explanation text...</p>
+                </div>
+            </div>
+            <div class="quiz-footer">
+                <span class="quiz-score" id="quizScoreDisplay">Score: 0 / 6</span>
+                <button class="primary-btn" id="quizNextBtn" style="display: none;">Next Question <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Application Javascript Modules -->
+    <script src="{{ url_for('static', filename='js/three_app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+</body>
+</html>
