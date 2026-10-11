@@ -7,7 +7,11 @@ import os
 import json
 import io
 import time
+import mimetypes
 from flask import Flask, render_template, jsonify, request, send_file
+
+mimetypes.add_type('model/gltf-binary', '.glb')
+mimetypes.add_type('model/gltf+json', '.gltf')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(
