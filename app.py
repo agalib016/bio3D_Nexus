@@ -3,12 +3,25 @@ Bio3D Anatomia - Comprehensive 3D Human Anatomy Segmented Atlas
 Flask Backend Application
 """
 
-from flask import Flask, render_template, jsonify, request, send_file
+import os
 import json
 import io
 import time
+from flask import Flask, render_template, jsonify, request, send_file
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static'),
+    static_url_path='/static'
+)
+
+@app.route('/favicon.ico')
+def favicon():
+    return ('', 204)
+
+
 
 # Complete Anatomical Dataset with all major body parts, segmented structures, and clinical insights
 ANATOMY_DATA = {
