@@ -127,23 +127,127 @@ class UIController {
             }
         });
 
-        // Dropdown Search Filter
+        // Dropdown Search Filter across all 78 organs
         if (this.organDropdownFilter) {
             this.organDropdownFilter.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
-                this.organMenuItems.forEach(item => {
+                const items = document.querySelectorAll('.organ-menu-item');
+                items.forEach(item => {
                     const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(query) ? 'flex' : 'none';
+                    const match = text.includes(query);
+                    item.style.display = match ? 'flex' : 'none';
+                });
+
+                // Also update group headers visibility
+                document.querySelectorAll('.organ-group-title').forEach(title => {
+                    let next = title.nextElementSibling;
+                    let hasVisible = false;
+                    while (next && !next.classList.contains('organ-group-title')) {
+                        if (next.style.display !== 'none') hasVisible = true;
+                        next = next.nextElementSibling;
+                    }
+                    title.style.display = (hasVisible || !query) ? 'block' : 'none';
                 });
             });
         }
 
         // Dropdown Item Click
-        this.organMenuItems.forEach(item => {
-            item.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+            const item = e.target.closest('.organ-menu-item');
+            if (item) {
                 const organId = item.dataset.organ;
-                this.switchOrgan(organId);
-                this.organDropdownWrapper.classList.remove('open');
+                if (organId) {
+                    this.switchOrgan(organId);
+                    if (this.organDropdownWrapper) this.organDropdownWrapper.classList.remove('open');
+                }
+            }
+        });
+
+        // Anatomical Dissection Layers HUD Controls
+        const btnPeel = document.getElementById('btnPeelToOrgans');
+        if (btnPeel) {
+            btnPeel.addEventListener('click', () => {
+                if (window.anatomyViewer) window.anatomyViewer.peelToOrgans();
+                document.getElementById('layerCardSkin')?.classList.add('muted');
+                document.getElementById('layerCardMuscles')?.classList.add('muted');
+                document.getElementById('layerCardBones')?.classList.remove('muted');
+                document.getElementById('layerCardVessels')?.classList.remove('muted');
+                document.getElementById('layerCardNerves')?.classList.remove('muted');
+                document.getElementById('layerCardOrgans')?.classList.remove('muted');
+
+                const sEye = document.querySelector('.layer-eye-btn[data-layer="skin"] i');
+                if (sEye) sEye.className = 'fa-solid fa-eye-slash';
+                const mEye = document.querySelector('.layer-eye-btn[data-layer="muscles"] i');
+                if (mEye) mEye.className = 'fa-solid fa-eye-slash';
+
+                this.showToast('Skin & muscles peeled: Visceral organs, vessels & skeleton revealed');
+            });
+        }
+
+        const btnSkel = document.getElementById('btnSkeletonOnly');
+        if (btnSkel) {
+            btnSkel.addEventListener('click', () => {
+                if (window.anatomyViewer) window.anatomyViewer.skeletonOnly();
+                ['skin', 'muscles', 'vessels', 'nerves', 'organs'].forEach(l => {
+                    const card = document.getElementById('layerCard' + l.charAt(0).toUpperCase() + l.slice(1));
+                    if (card) card.classList.add('muted');
+                    const eye = document.querySelector(`.layer-eye-btn[data-layer="${l}"] i`);
+                    if (eye) eye.className = 'fa-solid fa-eye-slash';
+                });
+                const bCard = document.getElementById('layerCardBones');
+                if (bCard) bCard.classList.remove('muted');
+                const bEye = document.querySelector('.layer-eye-btn[data-layer="bones"] i');
+                if (bEye) bEye.className = 'fa-solid fa-eye';
+
+                this.showToast('Isolated osteological skeleton framework (206 bones)');
+            });
+        }
+
+        const btnReset = document.getElementById('btnResetLayers');
+        if (btnReset) {
+            btnReset.addEventListener('click', () => {
+                if (window.anatomyViewer) window.anatomyViewer.resetLayers();
+                document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('muted'));
+                document.querySelectorAll('.layer-eye-btn i').forEach(i => i.className = 'fa-solid fa-eye');
+                document.querySelectorAll('.layer-opacity-slider').forEach(s => s.value = 100);
+                this.showToast('All 6 anatomical layers restored');
+            });
+        }
+
+        // Layer Eye Buttons
+        document.querySelectorAll('.layer-eye-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const layer = btn.dataset.layer;
+                const card = btn.closest('.layer-card');
+                const isMuted = card.classList.toggle('muted');
+                btn.querySelector('i').className = isMuted ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+
+                if (window.anatomyViewer) {
+                    window.anatomyViewer.toggleLayer(layer, !isMuted);
+                }
+                this.showToast(`${layer.toUpperCase()} layer ${isMuted ? 'hidden' : 'visible'}`);
+            });
+        });
+
+        // Layer Opacity Sliders
+        document.querySelectorAll('.layer-opacity-slider').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const layer = slider.dataset.layer;
+                const opacity = parseFloat(slider.value) / 100;
+                const card = slider.closest('.layer-card');
+                if (opacity <= 0.05) {
+                    card?.classList.add('muted');
+                    const eye = card?.querySelector('.layer-eye-btn i');
+                    if (eye) eye.className = 'fa-solid fa-eye-slash';
+                } else {
+                    card?.classList.remove('muted');
+                    const eye = card?.querySelector('.layer-eye-btn i');
+                    if (eye) eye.className = 'fa-solid fa-eye';
+                }
+
+                if (window.anatomyViewer) {
+                    window.anatomyViewer.setLayerOpacity(layer, opacity);
+                }
             });
         });
 
@@ -408,11 +512,13 @@ class UIController {
        ORGAN DATA FETCH & SELECTION
        ------------------------------------------------------------- */
     switchOrgan(organId) {
-        // Sync Dropdown menu selection
-        this.organMenuItems.forEach(item => {
-            item.classList.toggle('active', item.dataset.organ === organId);
-            if (item.dataset.organ === organId) {
-                const icon = item.querySelector('.menu-icon')?.textContent || '🧍';
+        // Sync Dropdown menu selection across all 78+ organs
+        const allMenuItems = document.querySelectorAll('.organ-menu-item');
+        allMenuItems.forEach(item => {
+            const isActive = item.dataset.organ === organId;
+            item.classList.toggle('active', isActive);
+            if (isActive) {
+                const icon = item.querySelector('.menu-icon')?.textContent || '🫀';
                 const title = item.querySelector('.item-title')?.textContent || 'Body Part';
                 if (this.navSelectedOrganIcon) this.navSelectedOrganIcon.textContent = icon;
                 if (this.navSelectedOrganName) this.navSelectedOrganName.textContent = title;
@@ -423,6 +529,16 @@ class UIController {
         this.organTabs.forEach(chip => {
             chip.classList.toggle('active', chip.dataset.organ === organId);
         });
+
+        // Toggle Dissection Layers HUD (Active exclusively on full_body)
+        const layersHud = document.getElementById('dissectionLayersHud');
+        if (layersHud) {
+            if (organId === 'full_body') {
+                layersHud.classList.remove('hidden');
+            } else {
+                layersHud.classList.add('hidden');
+            }
+        }
 
         if (window.anatomyViewer) {
             window.anatomyViewer.loadOrgan(organId);

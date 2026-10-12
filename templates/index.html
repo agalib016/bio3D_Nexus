@@ -58,111 +58,31 @@
                         <input type="text" id="organDropdownFilter" placeholder="Filter body parts...">
                     </div>
                     
-                    <div class="organ-menu-scroll">
+                    <div class="organ-menu-scroll" id="organMenuScroll">
                         <!-- Group 1: Integrated -->
                         <div class="organ-group-title">Integrative Matrix</div>
                         <button class="organ-menu-item active" data-organ="full_body">
                             <span class="menu-icon">🧍</span>
                             <div class="menu-text">
                                 <span class="item-title">Full Human Body</span>
-                                <span class="item-desc">All Organs in Translucent Silhouette</span>
+                                <span class="item-desc">6 Peeling Layers • Skin, Muscles, Vessels, Bones, Nerves, Viscera</span>
                             </div>
                         </button>
 
-                        <!-- Group 2: Cardiovascular -->
-                        <div class="organ-group-title">Cardiovascular System</div>
-                        <button class="organ-menu-item" data-organ="heart">
-                            <span class="menu-icon">🫀</span>
+                        {% if systems %}
+                        {% for system_name, organ_list in systems.items() %}
+                        <div class="organ-group-title">{{ system_name }} ({{ organ_list|length }})</div>
+                        {% for org in organ_list %}
+                        <button class="organ-menu-item" data-organ="{{ org.id }}">
+                            <span class="menu-icon">{{ org.icon }}</span>
                             <div class="menu-text">
-                                <span class="item-title">Human Heart (Specimen)</span>
-                                <span class="item-desc">Adipose Fat Pads, Coronary Tree & Valves</span>
+                                <span class="item-title">{{ org.name }}</span>
+                                <span class="item-desc">{{ org.latin if org.latin else system_name }}</span>
                             </div>
                         </button>
-
-                        <!-- Group 3: Respiratory -->
-                        <div class="organ-group-title">Respiratory System</div>
-                        <button class="organ-menu-item" data-organ="lungs">
-                            <span class="menu-icon">🫁</span>
-                            <div class="menu-text">
-                                <span class="item-title">Respiratory Lungs</span>
-                                <span class="item-desc">Trachea, Bilateral Lobes & Diaphragm</span>
-                            </div>
-                        </button>
-
-                        <!-- Group 4: Nervous & Sensory -->
-                        <div class="organ-group-title">Nervous & Sensory Apparatus</div>
-                        <button class="organ-menu-item" data-organ="brain">
-                            <span class="menu-icon">🧠</span>
-                            <div class="menu-text">
-                                <span class="item-title">Human Brain & Encephalon</span>
-                                <span class="item-desc">Cerebral Gyri, Cerebellum & Brainstem</span>
-                            </div>
-                        </button>
-                        <button class="organ-menu-item" data-organ="eye">
-                            <span class="menu-icon">👁️</span>
-                            <div class="menu-text">
-                                <span class="item-title">Human Eye (Ocular Globe)</span>
-                                <span class="item-desc">Cornea, Lens, Retina & Optic Nerve</span>
-                            </div>
-                        </button>
-
-                        <!-- Group 5: Digestive & Metabolic -->
-                        <div class="organ-group-title">Digestive & Metabolic Viscera</div>
-                        <button class="organ-menu-item" data-organ="liver">
-                            <span class="menu-icon">🫓</span>
-                            <div class="menu-text">
-                                <span class="item-title">Liver & Gallbladder</span>
-                                <span class="item-desc">Hepatic Lobes, Biliary Tree & Portal Triad</span>
-                            </div>
-                        </button>
-                        <button class="organ-menu-item" data-organ="stomach">
-                            <span class="menu-icon">🥐</span>
-                            <div class="menu-text">
-                                <span class="item-title">Stomach & Gastric Rugae</span>
-                                <span class="item-desc">Fundus, Body, Curvatures & Pylorus</span>
-                            </div>
-                        </button>
-                        <button class="organ-menu-item" data-organ="intestines">
-                            <span class="menu-icon">🌀</span>
-                            <div class="menu-text">
-                                <span class="item-title">Intestines (Enteric Tract)</span>
-                                <span class="item-desc">Small Intestine Coils, Colon & Appendix</span>
-                            </div>
-                        </button>
-                        <button class="organ-menu-item" data-organ="pancreas_spleen">
-                            <span class="menu-icon">🥖</span>
-                            <div class="menu-text">
-                                <span class="item-title">Pancreas & Spleen</span>
-                                <span class="item-desc">Islets of Langerhans & Lymphoid Spleen</span>
-                            </div>
-                        </button>
-
-                        <!-- Group 6: Renal & Pelvic -->
-                        <div class="organ-group-title">Renal & Pelvic Systems</div>
-                        <button class="organ-menu-item" data-organ="kidney">
-                            <span class="menu-icon">🫘</span>
-                            <div class="menu-text">
-                                <span class="item-title">Kidneys & Adrenals</span>
-                                <span class="item-desc">Renal Pyramids, Pelvis & Suprarenal Cap</span>
-                            </div>
-                        </button>
-                        <button class="organ-menu-item" data-organ="bladder">
-                            <span class="menu-icon">🎈</span>
-                            <div class="menu-text">
-                                <span class="item-title">Urinary Bladder</span>
-                                <span class="item-desc">Detrusor Muscle Dome & Pelvic Trigone</span>
-                            </div>
-                        </button>
-
-                        <!-- Group 7: Skeletal -->
-                        <div class="organ-group-title">Skeletal Framework</div>
-                        <button class="organ-menu-item" data-organ="skeleton">
-                            <span class="menu-icon">🦴</span>
-                            <div class="menu-text">
-                                <span class="item-title">Spine & Skeletal Ribcage</span>
-                                <span class="item-desc">Vertebrae, Costal Ribs & Pelvic Girdle</span>
-                            </div>
-                        </button>
+                        {% endfor %}
+                        {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -306,6 +226,118 @@
                 <button class="zoom-out-body-btn" id="zoomOutBodyBtn" style="display: none;" title="Zoom Out to Full Body Overview">
                     <i class="fa-solid fa-arrow-left"></i> Full Body
                 </button>
+            </div>
+
+            <!-- Floating Dissection Layers HUD (Active in Full Body mode) -->
+            <div class="dissection-layers-hud" id="dissectionLayersHud">
+                <div class="hud-layers-header">
+                    <div class="hud-layers-title-row">
+                        <i class="fa-solid fa-layer-group text-accent"></i>
+                        <span class="hud-layers-title">Anatomical Dissection Layers</span>
+                    </div>
+                    <div class="hud-layer-actions">
+                        <button class="layer-action-btn" id="btnPeelToOrgans" title="Strip skin and muscles to reveal all internal visceral organs">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Peel To Organs
+                        </button>
+                        <button class="layer-action-btn" id="btnSkeletonOnly" title="Display skeleton framework only">
+                            <i class="fa-solid fa-bone"></i> Skeleton
+                        </button>
+                        <button class="layer-action-btn" id="btnResetLayers" title="Reset all 6 layers to fully visible">
+                            <i class="fa-solid fa-rotate-left"></i> Reset All
+                        </button>
+                    </div>
+                </div>
+                <div class="layer-toggle-grid">
+                    <!-- Layer 1: Skin -->
+                    <div class="layer-card active" data-layer="skin" id="layerCardSkin">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">🧖</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Skin (Integument)</span>
+                                <span class="layer-sub">Realistic Epidermis / Dermis</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="skin" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="skin" title="Toggle Skin On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Layer 2: Muscles -->
+                    <div class="layer-card active" data-layer="muscles" id="layerCardMuscles">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">💪</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Muscles (68 Groups)</span>
+                                <span class="layer-sub">Striated Muscle Fibers</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="muscles" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="muscles" title="Toggle Muscles On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Layer 3: Veins & Arteries -->
+                    <div class="layer-card active" data-layer="vessels" id="layerCardVessels">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">🩸</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Veins & Arteries</span>
+                                <span class="layer-sub">Systemic Vasculature Tree</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="vessels" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="vessels" title="Toggle Vasculature On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Layer 4: Bones -->
+                    <div class="layer-card active" data-layer="bones" id="layerCardBones">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">🦴</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Bones (206 Skeletal)</span>
+                                <span class="layer-sub">Cortical Ivory Bone Chassis</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="bones" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="bones" title="Toggle Bones On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Layer 5: Nerves -->
+                    <div class="layer-card active" data-layer="nerves" id="layerCardNerves">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">⚡</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Nerves (Nervous)</span>
+                                <span class="layer-sub">Spinal Cord & Plexuses</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="nerves" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="nerves" title="Toggle Nerves On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Layer 6: Visceral Organs -->
+                    <div class="layer-card active" data-layer="organs" id="layerCardOrgans">
+                        <div class="layer-card-left">
+                            <span class="layer-badge-icon">🫀</span>
+                            <div class="layer-info">
+                                <span class="layer-name">Visceral Organs (78)</span>
+                                <span class="layer-sub">Thoracic & Abdominal Matrix</span>
+                            </div>
+                        </div>
+                        <div class="layer-card-controls">
+                            <input type="range" class="layer-opacity-slider" min="0" max="100" value="100" data-layer="organs" title="Opacity">
+                            <button class="layer-eye-btn" data-layer="organs" title="Toggle Viscera On/Off"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Top-Right Explode Slider Control Overlay -->

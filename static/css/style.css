@@ -822,6 +822,206 @@ body {
     background: rgba(255, 255, 255, 0.15);
 }
 
+/* ==========================================================================
+   ANATOMICAL DISSECTION LAYERS HUD (FULL BODY LAYER PEELING)
+   ========================================================================== */
+.dissection-layers-hud {
+    position: absolute;
+    top: 5.4rem;
+    left: 1.25rem;
+    background: rgba(10, 16, 30, 0.92);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 16px;
+    padding: 0.85rem 1.05rem;
+    width: 330px;
+    z-index: 20;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 240, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    pointer-events: auto;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.dissection-layers-hud.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+}
+
+.hud-layers-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.5rem;
+}
+
+.hud-layers-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hud-layers-title {
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+}
+
+.hud-layer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.layer-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.45rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.layer-action-btn:hover {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.25);
+}
+
+.layer-toggle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.layer-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.65rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    transition: all var(--transition-fast);
+}
+
+.layer-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.layer-card.active {
+    border-color: rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.04);
+}
+
+.layer-card.muted {
+    opacity: 0.42;
+    filter: grayscale(0.7);
+    border-color: transparent;
+}
+
+.layer-card-left {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.layer-badge-icon {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+}
+
+.layer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.layer-name {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.layer-sub {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+}
+
+.layer-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.layer-opacity-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 64px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 2px;
+    outline: none;
+}
+
+.layer-opacity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 6px var(--accent-cyan);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.layer-opacity-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+}
+
+.layer-eye-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: rgba(0, 240, 255, 0.12);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: var(--accent-cyan);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.layer-eye-btn:hover {
+    background: var(--accent-cyan);
+    color: #060913;
+    box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.layer-card.muted .layer-eye-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+}
+
 /* Bottom Center Floating Action Dock */
 .floating-action-dock {
     position: absolute;
